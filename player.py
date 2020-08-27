@@ -9,10 +9,14 @@ class Player:
             self.steam  = re.sub(' +', ' ', identifiers[0].replace('\n', '').replace('\r', ''))[1:-1]
             self.license = re.sub(' +', ' ', identifiers[1].replace('\n', '').replace('\r', ''))[1:-1]
             self.discord = None
-
+            
             if len(identifiers) == 3:
                 self.discord = re.sub(' +', ' ', identifiers[2].replace('\n', '').replace('\r', ''))[1:-1]
-            else:
+            elif len(identifiers) == 4:              
+                self.discord = re.sub(' +', ' ', identifiers[3].replace('\n', '').replace('\r', ''))[1:-1]
+            elif len(identifiers) == 5:
+                self.discord = re.sub(' +', ' ', identifiers[4].replace('\n', '').replace('\r', ''))[1:-1]
+            elif len(identifiers) == 6:
                 self.discord = re.sub(' +', ' ', identifiers[4].replace('\n', '').replace('\r', ''))[1:-1]
     
 

@@ -4,6 +4,9 @@ from os import system
 from datetime import datetime
 from player import Player
 from os import path
+from colorama import init
+from colorama import Fore, Back, Style
+init()
 
 import os.path
 import time
@@ -17,6 +20,7 @@ serverList = ["http://116.202.234.15:30145/webadmin/"]
 
 globalPlayerList = []
 playerList = [] 
+watchList = []
 
 def getData(url):
     htmlSource = ""
@@ -61,16 +65,19 @@ def getPlayerList(soup):
 def mergeLists():
     global globalPlayerList, playerList
     for p in playerList:
-        if not any(x.name == p.steam for x in globalPlayerList):
+        if not any(x.steam == p.steam for x in globalPlayerList):
             globalPlayerList.append(p)
 
 def saveToFile(file="players.txt"):
+    if len(globalPlayerList) == 0:
+        return False
+    
     with open(file, "w", encoding="utf-8") as f:
         json.dump([ob.__dict__ for ob in globalPlayerList], f)
     print("Saved player datas")
 
 def readFromFile(file="players.txt"):
-    if not path.isfile(file):
+    if ((not path.isfile(file)) or (os.stat(file).st_size == 0)):
         return []
     with open(file, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -82,6 +89,21 @@ def on_release(key, ):
         mergeLists()
         saveToFile()
         sys.exit("ESC pressed") 
+
+def printPlayer():
+    for player in playerList:
+        if player.name in watchList:
+            
+            print(Style.BRIGHT + Fore.WHITE + Back.GREEN)
+            print(player)
+            print(Style.RESET_ALL)
+        else:
+            print(player)
+            print()
+
+def loadWatchList(file="watchlist.txt"):
+    with open(file, "r", encoding="utf-8") as f:
+        return f.read().split("\n")
 
 def loop(datas):
     while(True):
@@ -101,16 +123,22 @@ def loop(datas):
         playerCount = getPlayerCount(soup)
         playerList = getPlayerList(soup)
         
-        
         print("\n" + serverName + "\n\n")
-        print('\n\n'.join(str(player) for player in playerList))
-        print("\nPlayers online:", playerCount)
+        
+       
         print("\n|" + "-" * 81 + "|\n")
-        print(globalPlayerList)
+        #print(globalPlayerList)
         print(len(globalPlayerList))
+        #print('\n\n'.join(str(player) for player in playerList))
+        printPlayer()
+        print("\nPlayers stored: " + str(len(globalPlayerList)))
+        print("\nPlayers online:", playerCount)
+        print(Fore.RED)
+        print(watchList)
+        print(Style.RESET_ALL)
         mergeLists()
         saveToFile()
-        time.sleep(10)
+        time.sleep(60)
 
 def setGlobalPlayerList(datas):
     global globalPlayerList
@@ -120,8 +148,10 @@ def setGlobalPlayerList(datas):
 
 
 def main():
-    
+    global watchList
     datas = readFromFile()
+    watchList = loadWatchList()
+   
     x = threading.Thread(target=loop, args=(datas,))
     x.setDaemon(True)
     setGlobalPlayerList(datas)
