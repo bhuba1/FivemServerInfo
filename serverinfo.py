@@ -73,7 +73,7 @@ def saveToFile(file="players.txt"):
         return False
     
     with open(file, "w", encoding="utf-8") as f:
-        json.dump([ob.__dict__ for ob in globalPlayerList], f)
+        json.dump([ob.__dict__ for ob in globalPlayerList], f, indent=2, ensure_ascii=False)
     print("Saved player datas")
 
 def readFromFile(file="players.txt"):
@@ -117,7 +117,7 @@ def loop(datas):
         print("\n|" + "-" * 30 + "| FiveM Server Info |" + "-" * 30 + "|\n")
         
         html = getData(serverList[0])
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html.decode('utf-8','ignore'), 'html.parser')
         
         serverName = getServerName(soup)
         playerCount = getPlayerCount(soup)
@@ -156,8 +156,7 @@ def main():
     x.setDaemon(True)
     setGlobalPlayerList(datas)
     
-    try:
-        
+    try:        
         x.start()
         with Listener( on_release=on_release) as listener:
             listener.join()
